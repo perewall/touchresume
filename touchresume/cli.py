@@ -9,7 +9,6 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from . import create_app, db
-from .tasks import celery
 
 
 def init_sentry_integration(app, integration):
@@ -62,6 +61,7 @@ def cli():
 @option('-l', '--loglevel', default='info', help='Celery logging level')
 def tasks(workers, loglevel):
     """Run a tasks with Celery worker."""
+    from .tasks import celery
     init_sentry_integration(current_app, CeleryIntegration)
     celery.Worker(
         beat=True, loglevel=loglevel.upper(),
