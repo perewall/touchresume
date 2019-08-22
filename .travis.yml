@@ -1,0 +1,31 @@
+language: python
+
+cache: pip
+
+git:
+  depth: 5
+  quiet: true
+  submodules: false
+
+install:
+  - pip install mysql-connector-python -r requirements.txt
+
+script:
+  - coverage erase
+  - coverage run manage.py test
+
+after_success:
+  - codecov
+
+services:
+  - postgresql
+  - mysql
+
+python:
+  - 3.6
+  - 3.7
+
+env:
+  - TEST_DATABASE_URL=sqlite://
+  - TEST_DATABASE_URL=postgres://postgres@localhost:5432/postgres
+  - TEST_DATABASE_URL=mysql+mysqlconnector://travis@localhost:3306/travis

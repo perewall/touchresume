@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% set title='{0} {1}'.format(error.code, error.name) %}
+
+{% block html %}
+  <div class="w-50 px-4 py-4 mx-auto text-center">
+    <span class="badge bg-info mb-3">
+      <h1 class="text-white"><strong>{{ error.code }}</strong> {{ error.name }}</h1>
+    </span>
+    <h4 class="text-info">{{ error.description }}</h4>
+  </div>
+{% endblock %}

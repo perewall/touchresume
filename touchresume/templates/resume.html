@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% set title='Resume' %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap4-toggle@3.5.0/css/bootstrap4-toggle.min.css" integrity="sha256-tlSv95E7vlf4m6l8jaN3WAMbhOIN6msqSzoFOUGUB18=" crossorigin="anonymous">
+{% endblock %}
+
+{% block html %}
+  <div class="list-group list-group-flush">
+    {% for resume in resumes | sort(attribute='identity') %}
+    <div class="list-group-item d-flex justify-content-between">
+        <div class="d-none d-sm-flex">
+          {% if resume.photo %}
+          <img src="{{ resume.photo }}" style="max-height: 100px; max-width: 80px;">
+          {% else %}
+          <small class="text-muted text-center" style="min-height: 100px; min-width: 80px;">No photo</small>
+          {% endif %}
+        </div>
+        <div class="flex-grow-1 pl-sm-4">
+          <h6><a href="{{ resume.link }}" target="_blank">{{ resume.title }}</a></h6>
+          <small class="d-sm-block text-muted">last updated: <span id="datetime">{{ resume.published }}</span></small>
+        </div>
+        <small class="d-none d-md-block text-muted pl-md-2">#{{ resume.account }}</small>
+        <div class="pl-3">
+          <input data-toggle="toggle" data-onstyle="success" data-offstyle="danger" type="checkbox" value="{{ resume.identity }}" {% if resume.autoupdate %}checked{% endif %}>
+        </div>
+    </div>
+    {% endfor %}
+    {% if not resumes %}
+    <p class="text-muted text-center">What are you doing here? :)</p>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap4-toggle@3.5.0/js/bootstrap4-toggle.min.js" integrity="sha256-yKiDindrQEWLgBAjPulWqEpof2OA/mqCTS85zsK1GmE=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+  $('input').each(function() {
+    $(this).change(function() {
+      $.post({
+        url: "{{ url_for('views.switch') }}",
+        data: {
+          resume: $(this).prop("value")
+        },
+        headers: {
+          "X-CSRFToken": "{{ csrf_token() }}"
+        },
+        success: function(data, status, xhr) {
+          $(this).prop("checked", data.state).change();
+        }
+      }).fail(function(e) {
+        send_notification("Switch error: " + e.status +" " + e.statusText, "error");
+      });
+    });
+  })
+</script>
+{% endblock %}

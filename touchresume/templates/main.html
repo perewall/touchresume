@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block html %}
+  <div class="px-4 py-4 mx-auto text-center">
+    <h1 class="display-4">Welcome!</h1>
+  </div>
+  {% if providers %}
+  <p class="lead text-center">Please, select your provider</p>
+  {% for provider in providers.values() %}
+  <div class="row text-center pt-2">
+    <div class="col-md-4 offset-md-4">
+      <a class="btn btn-lg btn-block btn-outline-danger"{% if (current_user.is_authenticated) and (provider.name == session.last_provider) %} data-toggle="modal" data-target="#{{ provider.name }}"{% endif %} href="{{ url_for('views.login', provider=provider.name) }}">
+        {{ provider.name.upper() }}
+      </a>
+    </div>
+  </div>
+  {% if (current_user.is_authenticated) and (provider.name == session.last_provider) %}
+  <div class="modal fade" id="{{ provider.name }}" tabindex="-1" role="dialog" aria-labelledby="{{ provider.name }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Hint</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="pb-2">You are already logged in via {{ provider.name.upper() }}.</p>
+          If you want to add another account:
+          <ul>
+            <li>go to the <a href="{{ provider.website }}" target="_blank">{{ provider.name }} website <small><i class="fa fa-xs fa-external-link" aria-hidden="true"></i></small></a> and sign out</li>
+            <li>come back and click the button below</li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <a class="btn btn-primary" href="{{ url_for('views.login', provider=provider.name) }}">Continue</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% else %}
+  <p class="lead text-center">Providers is not connected :(</p>
+  {% endif %}
+  <p class="lead pt-5">Last updates</p>
+  <div class="list-group list-group-flush">
+    {% for task in info.tasks %}
+    <div class="list-group-item">
+      <div class="d-flex justify-content-between align-items-center">
+        <small id="datetime">{{ task.finished_at | isoformat }}</small>
+        <small class="text-muted d-none d-sm-block">{{ task.duration }} s</small>
+        <div class="pl-1">
+          <span class="badge badge-secondary">Skipped: {{ task.skipped }}</span>
+          <span class="badge badge-success">Success: {{ task.success }}</span>
+          <span class="badge badge-info">Total: {{ task.total }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% if not info.tasks %}
+    <p class="text-muted text-center">No updates :(</li>
+    {% endif %}
+  </div>
+  <div class="d-flex justify-content-between pt-5">
+    <ul class="list-unstyled small">
+      <li class="text-muted">
+        Version: <a href="https://github.com/perewall/touchresume" target="_blank">{{ info.version }}</a>
+      </li>
+      <li class="text-muted">Users: {{ info.users }}</li>
+      <li class="text-muted">Accounts: {{ info.accounts }}</li>
+      <li class="text-muted">Resume: {{ info.resume }}</li>
+    </ul>
+    {% for provider in info.providers %}
+    <div>
+      <strong class="text-muted">{{ provider.name.upper() }}</strong>
+      <ul class="list-unstyled small">
+        <li class="text-muted">Accounts: {{ provider.accounts }}</li>
+        <li class="text-muted">Resume: {{ provider.resume }}</li>
+      </ul>
+    </div>
+    {% endfor %}
+  </div>
+{% endblock %}

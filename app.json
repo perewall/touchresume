@@ -1,0 +1,46 @@
+{
+  "name": "TouchResume",
+  "description": "Tool for automatically update your CV on some job boards",
+  "keywords": ["resume", "cv", "headhunter", "superjob"],
+  "addons": [
+    "heroku-postgresql:hobby-dev",
+    "heroku-redis:hobby-dev",
+    "sentry:f1",
+    "timber-logging:free"
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    },
+    "worker": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "env": {
+    "SERVER_NAME": {
+      "description": "A instance URL used to specify the 'Origin' header for HTTP requests and for generate callback URL's, e.g. myapp.herokuapp.com"
+    },
+    "SECRET_KEY": {
+      "description": "A secret key for verifying the integrity of signed cookies",
+      "generator": "secret"
+    },
+    "HH_CLIENT_ID": {
+      "description": "HeadHunter application ID, got it on https://dev.hh.ru",
+      "required": false
+    },
+    "HH_CLIENT_SECRET": {
+      "description": "HeadHunter application secret",
+      "required": false
+    },
+    "SJ_CLIENT_ID": {
+      "description": "SuperJob application ID, got it on https://api.superjob.ru",
+      "required": false
+    },
+    "SJ_CLIENT_SECRET": {
+      "description": "SuperJob application secret",
+      "required": false
+    }
+  }
+}

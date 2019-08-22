@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% set title='Accounts' %}
+
+{% block html %}
+  <div class="list-group list-group-flush">
+    {% for account in current_user.accounts | sort(attribute='identity') %}
+    <div class="list-group-item">
+      <div class="d-flex justify-content-between align-items-center">
+        <h6 class="mb-1">{{ account.identity }}</h6>
+        <small class="text-muted">{{ account.provider }}</small>
+        <small class="d-none d-sm-block">Expires: <span id="datetime">{{ account.expires }}</span></small>
+        <div>
+          <span class="badge badge-info">Resume: {{ account.resume | length }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor -%}
+    {% if not current_user.accounts %}
+    <p class="text-muted text-center">How did it happen? :)</p>
+    {% endif %}
+  </div>
+{% endblock %}

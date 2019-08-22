@@ -1,0 +1,14 @@
+.git
+build
+dist
+env
+tests
+postgres
+
+.coverage
+.coveragerc
+.dockerignore
+.gitignore
+.travis.yml
+app.json
+Procfile
