@@ -1,21 +1,10 @@
-from flask import current_app
 from flask.cli import FlaskGroup, with_appcontext
 from flask_migrate.cli import db as migrate
 from click import group, option, confirm
 from gunicorn.app.base import BaseApplication
 from redbeat import RedBeatScheduler
-from sentry_sdk import init as init_sentry
-from sentry_sdk.integrations.flask import FlaskIntegration
-from sentry_sdk.integrations.celery import CeleryIntegration
 
 from . import create_app, db
-
-
-def init_sentry_integration(app, integration):
-    dsn = app.config.get('SENTRY_DSN')
-    if dsn:
-        env = 'development' if app.debug else 'production'
-        init_sentry(dsn=dsn, environment=env, integrations=[integration()])
 
 
 class GunicornApp(BaseApplication):
@@ -31,9 +20,7 @@ class GunicornApp(BaseApplication):
                 self.cfg.set(key.lower(), value)
 
     def load(self):
-        app = self.app_factory()
-        init_sentry_integration(app, FlaskIntegration)
-        return app
+        return self.app_factory()
 
 
 @migrate.command('create')
@@ -62,7 +49,6 @@ def cli():
 def tasks(workers, loglevel):
     """Run a tasks with Celery worker."""
     from .tasks import celery
-    init_sentry_integration(current_app, CeleryIntegration)
     celery.Worker(
         beat=True, loglevel=loglevel.upper(),
         scheduler=RedBeatScheduler, concurrency=workers).start()

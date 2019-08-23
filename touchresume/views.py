@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from flask import Blueprint, current_app, request, session
 from flask import redirect, url_for, render_template, jsonify, flash
 from flask_login import current_user, login_user, logout_user, login_required
-from werkzeug.exceptions import HTTPException, ServiceUnavailable
+from werkzeug.exceptions import HTTPException
 
 from . import db, cache, providers
 from .models import User, Account, Resume, Task, ResumeSchema
@@ -35,12 +35,8 @@ def isoformat_with_timezone(date):
     return date.replace(tzinfo=timezone.utc).isoformat()
 
 
-@views.app_errorhandler(Exception)
+@views.app_errorhandler(HTTPException)
 def error_page(err):
-    session.pop('_flashes', None)
-    if not isinstance(err, HTTPException):
-        current_app.logger.exception(err)
-        err = ServiceUnavailable()
     return render_template('error.html', error=err), err.code
 
 

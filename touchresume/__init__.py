@@ -13,6 +13,11 @@ from flask_marshmallow import Marshmallow
 from flask_debugtoolbar import DebugToolbarExtension
 from celery import Celery
 from cerberus import Validator
+from sentry_sdk import init as init_sentry
+from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
 from .providers import Providers
 from .schema import AppConfigSchema
@@ -68,5 +73,13 @@ def create_app(config=None):
 
     with app.app_context():  # url_for
         providers.init_app(app, 'views.login')
+
+    dsn = app.config.get('SENTRY_DSN')
+    if dsn and (not app.testing):  # pragma: no cover
+        init_sentry(
+            dsn=dsn, environment='development' if app.debug else 'production',
+            integrations=[
+                FlaskIntegration(), SqlalchemyIntegration(),
+                RedisIntegration(), CeleryIntegration()])
 
     return app

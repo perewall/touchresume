@@ -18,9 +18,9 @@ class TestView(TestApp):
         self.assertIn(pattern, response.location)
 
     def test_view_error(self):
-        del self.app.version  # !
-        response = self.client.get(url_for('views.main'))
-        self.assertTrue(response.status_code >= 500)
+        response = self.client.post(url_for('views.main'))
+        self.assertEqual(response.status_code, 405)
+        self.assertIn(url_for('views.main'), response.get_data(as_text=True))
 
     def test_view_main(self):
         FakeModels.task()
