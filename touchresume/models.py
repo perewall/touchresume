@@ -104,4 +104,7 @@ class ResumeSchema(ma.ModelSchema):
 
 @login.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    try:
+        return User.query.get(user_id)
+    except Exception:  # pragma: no cover
+        return None
