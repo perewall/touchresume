@@ -24,7 +24,7 @@ from .schema import AppConfigSchema
 from .config import AppConfig, LoggingConfig
 
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 
 db = SQLAlchemy()
