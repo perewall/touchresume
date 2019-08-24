@@ -37,7 +37,8 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(
         current_app.config['REAUTH_INTERVAL'], refresh_tokens.s())
     sender.add_periodic_task(
-        current_app.config['CLEANUP_TASKS_INTERVAL'], cleanup_tasks.s())
+        current_app.config['CLEANUP_TASKS_INTERVAL'],
+        cleanup_tasks.s(current_app.config['TASKS_LIMIT']))
     sender.add_periodic_task(
         current_app.config['CLEANUP_RESUME_INTERVAL'], cleanup_resume.s())
     sender.add_periodic_task(
@@ -112,80 +113,40 @@ def refresh_tokens():
 
 
 @celery.task
-def cleanup_tasks():
-    result = dict(total=0, success=0, skipped=0)
+def cleanup_tasks(keep):
     tasks = Task.query.order_by('finished_at').all()
-    for task in tasks[:-current_app.config['TASKS_LIMIT']]:
+    for task in tasks[:-keep]:
         logger.info(f'Cleanup task: {task}')
-        try:
-            db.session.delete(task)
-            db.session.commit()
-        except Exception as e:  # pragma: no cover
-            result['skipped'] += 1
-            logger.exception(f'Cleanup task skip: {task}, err={e}')
-        else:
-            result['success'] += 1
-        finally:
-            result['total'] += 1
-
-    return result
+        db.session.delete(task)
+    db.session.commit()
+    return (len(tasks) - keep) if len(tasks) >= keep else 0
 
 
 @celery.task
 def cleanup_resume():
-    result = dict(total=0, success=0, skipped=0)
     resumes = Resume.query.filter_by(autoupdate=False).all()
     for resume in resumes:
         logger.info(f'Cleanup resume: {resume}')
-        try:
-            db.session.delete(resume)
-            db.session.commit()
-        except Exception as e:  # pragma: no cover
-            result['skipped'] += 1
-            logger.exception(f'Cleanup resume skip: {resume}, err={e}')
-        else:
-            result['success'] += 1
-        finally:
-            result['total'] += 1
-
-    return result
+        db.session.delete(resume)
+    db.session.commit()
+    return len(resumes)
 
 
 @celery.task
 def cleanup_accounts():
-    result = dict(total=0, success=0, skipped=0)
     accounts = Account.query.filter(~Account.resume.any()).all()
     for account in accounts:
         logger.info(f'Cleanup account: {account}')
-        try:
-            db.session.delete(account)
-            db.session.commit()
-        except Exception as e:  # pragma: no cover
-            result['skipped'] += 1
-            logger.exception(f'Cleanup account skip: {account}, err={e}')
-        else:
-            result['success'] += 1
-        finally:
-            result['total'] += 1
-
-    return result
+        db.session.delete(account)
+    db.session.commit()
+    return len(accounts)
 
 
 @celery.task
 def cleanup_users():
-    result = dict(total=0, success=0, skipped=0)
     users = User.query.filter(~User.accounts.any()).all()
     for user in users:
         logger.info(f'Cleanup user: {user}')
-        try:
-            db.session.delete(user)
-            db.session.commit()
-        except Exception as e:  # pragma: no cover
-            result['skipped'] += 1
-            logger.exception(f'Cleanup user skip: {user}, err={e}')
-        else:
-            result['success'] += 1
-        finally:
-            result['total'] += 1
-
-    return result
+        db.session.delete(user)
+    db.session.commit()
+    return len(users)

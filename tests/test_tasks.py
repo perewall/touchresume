@@ -59,12 +59,11 @@ class TasksTest(TestApp):
         before_cleanup = Task.query.count()
         self.assertEqual(4, before_cleanup)
 
-        result = tasks.cleanup_tasks()
+        result = tasks.cleanup_tasks(2)
+        self.assertEqual(2, result)
 
         after_cleanup = Task.query.count()
         self.assertEqual(2, after_cleanup)
-
-        self.assertTaskResult(result, total=2, success=2)
 
     def test_task_cleanup_users(self):
         user1, user2 = FakeModels.user(), FakeModels.user()
@@ -75,12 +74,11 @@ class TasksTest(TestApp):
         self.assertIn(user2, before_cleanup)
 
         result = tasks.cleanup_users()
+        self.assertEqual(1, result)
 
         after_cleanup = User.query.all()
         self.assertIn(user1, after_cleanup)
         self.assertNotIn(user2, after_cleanup)
-
-        self.assertTaskResult(result, total=1, success=1)
 
     def test_task_cleanup_accounts(self):
         account1 = FakeModels.account()
@@ -92,12 +90,11 @@ class TasksTest(TestApp):
         self.assertIn(account2, before_cleanup)
 
         result = tasks.cleanup_accounts()
+        self.assertEqual(1, result)
 
         after_cleanup = Account.query.all()
         self.assertIn(account1, after_cleanup)
         self.assertNotIn(account2, after_cleanup)
-
-        self.assertTaskResult(result, total=1, success=1)
 
     def test_task_cleanup_resume(self):
         resume1 = FakeModels.resume(autoupdate=True)
@@ -108,9 +105,8 @@ class TasksTest(TestApp):
         self.assertIn(resume2, before_cleanup)
 
         result = tasks.cleanup_resume()
+        self.assertEqual(1, result)
 
         after_cleanup = Resume.query.all()
         self.assertIn(resume1, after_cleanup)
         self.assertNotIn(resume2, after_cleanup)
-
-        self.assertTaskResult(result, total=1, success=1)
