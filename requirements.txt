@@ -23,3 +23,6 @@ responses >= 0.10.6
 
 coverage >= 4.5.4
 codecov >= 2.0.15
+
+semver >= 2.8.1
+gitpython >= 3.0.2
