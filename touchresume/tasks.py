@@ -53,7 +53,6 @@ def touch_resume():
     result = dict(total=0, success=0, skipped=0)
     resumes = Resume.query.filter_by(autoupdate=True).all()
     for resume in [r for r in resumes if r.account.provider in providers]:
-        sleep(0.3)
         try:
             provider = providers[resume.account.provider]
             if resume.updelta < provider.touch_limit:
@@ -71,10 +70,11 @@ def touch_resume():
             logger.exception(f'Touch resume error: {resume}, err={e}')
         else:
             result['success'] += 1
-            logger.info(f'Touch resume success: {resume}')
+            logger.debug(f'Touch resume success: {resume}')
         finally:
             result['total'] += 1
             db.session.commit()
+            sleep(0.3)
 
     return result
 
@@ -84,7 +84,6 @@ def refresh_tokens():
     result = dict(total=0, success=0, skipped=0)
     accounts = Account.query.all()
     for account in [acc for acc in accounts if acc.provider in providers]:
-        sleep(0.3)
         try:
             provider = providers[account.provider]
             ids = provider.tokenize(account.refresh, refresh=True)
@@ -105,9 +104,10 @@ def refresh_tokens():
             logger.exception(f'Refresh token error: {account}, err={e}')
         else:
             result['success'] += 1
-            logger.info(f'Refresh token success: {account}')
+            logger.debug(f'Refresh token success: {account}')
         finally:
             result['total'] += 1
+            sleep(0.3)
 
     return result
 
