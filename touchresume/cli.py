@@ -44,14 +44,13 @@ def cli():
 
 
 @cli.command()
-@option('-w', '--workers', type=int, default=None, help='Number of workers')
 @option('-l', '--loglevel', default='info', help='Celery logging level')
-def tasks(workers, loglevel):
+def tasks(loglevel):
     """Run a tasks with Celery worker."""
     from .tasks import celery
     celery.Worker(
         beat=True, loglevel=loglevel.upper(),
-        scheduler=RedBeatScheduler, concurrency=workers).start()
+        scheduler=RedBeatScheduler, concurrency=1).start()
 
 
 @cli.command(with_appcontext=False)
