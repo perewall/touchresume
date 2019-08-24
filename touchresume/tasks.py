@@ -8,7 +8,7 @@ from celery.utils.log import get_task_logger
 
 from . import db, celery, providers
 from .models import User, Account, Resume, Task
-from .providers import ProviderError
+from .providers import ProviderError, TouchLimitError
 
 
 logger = get_task_logger(__name__)
@@ -61,6 +61,9 @@ def touch_resume():
                 continue
             provider.touch(token=resume.account.access, resume=resume.identity)
             resume.published = datetime.utcnow()
+        except TouchLimitError as e:  # pragma: no cover
+            result['skipped'] += 1
+            logger.debug(f'Touch resume limit error: {resume}, {e}')
         except ProviderError as e:
             result['skipped'] += 1
             logger.warning(f'Resume autoupdate disabled: {resume}, {e}')

@@ -137,8 +137,8 @@ class MockResponses(object):
         add(method='GET', url=url, json=body, status=code)
 
     @staticmethod
-    def provider_touch(provider, identity, code=200):
+    def provider_touch(provider, identity, code=200, body=None):
         identity = identity.strip(f'{provider.short_name}_')
         push_url = provider.touch_url.format(identity)
         url = urljoin(provider.oauth.base_url, push_url)
-        add(method='POST', url=url, status=code)
+        add(method='POST', url=url, json=body, status=code)

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from requests.exceptions import HTTPError
 
-from .provider import BaseProvider, ProviderError
+from .provider import BaseProvider, ProviderError, TouchLimitError
 
 
 class HeadHunter(BaseProvider):
@@ -17,6 +17,7 @@ class HeadHunter(BaseProvider):
         self.fetch_url = 'resumes/mine'
         self.touch_url = 'resumes/{0}/publish'
         self.touch_limit = timedelta(hours=4)
+        self.touch_limit_error = (429, 'touch_limit_exceeded')
 
     def _parse_resume(self, item):
         pub_date = datetime.strptime(item['updated_at'], '%Y-%m-%dT%H:%M:%S%z')
@@ -72,6 +73,8 @@ class HeadHunter(BaseProvider):
                 url, headers=self.headers)
             rv.raise_for_status()
         except HTTPError as e:
+            if self._is_touch_limit_error(e):
+                raise TouchLimitError(provider=self, error=e)
             raise ProviderError(provider=self, error=e)
         else:
             return True

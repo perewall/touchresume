@@ -3,12 +3,12 @@ from collections import UserDict
 from flask import current_app, url_for
 from werkzeug.local import LocalProxy
 
-from .provider import ProviderError
+from .provider import ProviderError, TouchLimitError
 from .headhunter import HeadHunter
 from .superjob import SuperJob
 
 
-__all__ = ['Providers', 'ProviderError']
+__all__ = ['Providers', 'ProviderError', 'TouchLimitError']
 
 
 class Providers(UserDict):

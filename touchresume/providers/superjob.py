@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from requests.exceptions import HTTPError
 
-from .provider import BaseProvider, ProviderError
+from .provider import BaseProvider, ProviderError, TouchLimitError
 
 
 class SuperJob(BaseProvider):
@@ -19,6 +19,7 @@ class SuperJob(BaseProvider):
         self.fetch_url = 'user_cvs/'
         self.touch_url = 'user_cvs/update_datepub/{0}/'
         self.touch_limit = timedelta(hours=1)
+        self.touch_limit_error = (401, 'возможно через')
         self.headers.update({'X-Api-App-Id': self.oauth.client_secret})
 
     def _parse_resume(self, item):
@@ -82,6 +83,8 @@ class SuperJob(BaseProvider):
                 url, headers=self.headers)
             rv.raise_for_status()
         except HTTPError as e:
+            if self._is_touch_limit_error(e):
+                raise TouchLimitError(provider=self, error=e)
             raise ProviderError(provider=self, error=e)
         else:
             return True

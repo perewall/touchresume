@@ -2,7 +2,8 @@ from unittest import TestCase
 
 from responses import activate, reset
 
-from touchresume.providers import HeadHunter, SuperJob, ProviderError
+from touchresume.providers import HeadHunter, SuperJob
+from touchresume.providers import ProviderError, TouchLimitError
 
 from tests.mock import FakeResponses, MockResponses
 
@@ -95,6 +96,18 @@ class TestProvider(object):
             self.provider.touch('qwerty', '123')
 
         self.assertEqual(e.exception.code, 503)
+
+    @activate
+    def test_provider_touch_limit_error(self):
+        MockResponses.provider_touch(
+            self.provider, identity='123',
+            code=self.provider.touch_limit_error[0],
+            body=self.provider.touch_limit_error[1])
+
+        with self.assertRaises(TouchLimitError) as e:
+            self.provider.touch('qwerty', '123')
+
+        self.assertEqual(e.exception.code, self.provider.touch_limit_error[0])
 
 
 class HeadHunterTest(TestCase, TestProvider):
