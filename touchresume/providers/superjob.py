@@ -19,7 +19,7 @@ class SuperJob(BaseProvider):
         self.fetch_url = 'user_cvs/'
         self.touch_url = 'user_cvs/update_datepub/{0}/'
         self.touch_limit = timedelta(hours=1)
-        self.touch_limit_error = (401, 'возможно через')
+        self.touch_limit_error = (401, 'обновлени')
         self.headers.update({'X-Api-App-Id': self.oauth.client_secret})
 
     def _parse_resume(self, item):
